@@ -25,7 +25,7 @@ Notes on Prophet:
 2) Launch the GUI
 - Double-click run_forecast_gui.bat
   or
-- python D:\prophet_sarima\forecast_gui.py
+- python forecast_gui.py
 
 3) Use the app
 - Show Data: Select level (all/municipality/barangay) and filters, then click “Show Data” to display weekly aggregation (W-MON) on the chart and in the preview.
@@ -33,9 +33,9 @@ Notes on Prophet:
 
 4) CLI (optional, monthly)
 - Example overall monthly run (6 months):
-  - python forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --periods 6
+  - python forecast.py --file Animal Bites Cases.csv --periods 6
 - Municipality monthly run (12 months):
-  - python forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --level municipality --province RIZAL --municipality TAYTAY --periods 12
+  - python forecast.py --file Animal Bites Cases.csv --level municipality --province RIZAL --municipality TAYTAY --periods 12
 
 
 ## Pipeline Overview (Graph)
@@ -110,18 +110,18 @@ with priors encouraging sparse changepoints.
 We enable weekly and yearly seasonality and fit Prophet on the same training horizon as SARIMA.
 
 ### Hybrid: Inverse-RMSE Weighting
-Let \(\widehat{y}^{\,(S)}_t\) denote SARIMA’s forecast and \(\widehat{y}^{\,(P)}_t\) denote Prophet’s forecast, both aligned on the h-step validation horizon \(\{t_1,\dots,t_h\}\). Define validation RMSEs
+Let \(\widehat{y}^{(S)}_t\) denote SARIMA’s forecast and \(\widehat{y}^{(P)}_t\) denote Prophet’s forecast, both aligned on the h-step validation horizon \(\{t_1,\dots,t_h\}\). Define validation RMSEs
 
 $$
- \operatorname{RMSE}_S = \sqrt{\tfrac{1}{h}\sum_{i=1}^{h}\bigl(y_{t_i} - \widehat{y}^{\,(S)}_{t_i}\bigr)^2},
+ \mathrm{RMSE}_S = \sqrt{\frac{1}{h}\sum_{i=1}^{h}\bigl(y_{t_i} - \widehat{y}^{(S)}_{t_i}\bigr)^2},
  \qquad
- \operatorname{RMSE}_P = \sqrt{\tfrac{1}{h}\sum_{i=1}^{h}\bigl(y_{t_i} - \widehat{y}^{\,(P)}_{t_i}\bigr)^2}.
+ \mathrm{RMSE}_P = \sqrt{\frac{1}{h}\sum_{i=1}^{h}\bigl(y_{t_i} - \widehat{y}^{(P)}_{t_i}\bigr)^2}.
 $$
 
 The inverse-RMSE weights are
 
 $$
- w_S = \frac{\tfrac{1}{\operatorname{RMSE}_S}}{\tfrac{1}{\operatorname{RMSE}_S} + \tfrac{1}{\operatorname{RMSE}_P}},
+ w_S = \frac{1/\mathrm{RMSE}_S}{1/\mathrm{RMSE}_S + 1/\mathrm{RMSE}_P},
  \qquad
  w_P = 1 - w_S,
 $$
@@ -129,16 +129,30 @@ $$
 and the hybrid forecast is
 
 $$
- \widehat{y}^{\,(H)}_t = w_S\,\widehat{y}^{\,(S)}_t + w_P\,\widehat{y}^{\,(P)}_t.
+ \widehat{y}^{(H)}_t = w_S\,\widehat{y}^{(S)}_t + w_P\,\widehat{y}^{(P)}_t.
 $$
 
 Confidence bands for Hybrid can be approximated by a weighted combination of component intervals:
 
 $$
- [\widehat{y}^{\,(H)}_t]_{\text{lower}} \approx w_S\,[\widehat{y}^{\,(S)}_t]_{\text{lower}} + w_P\,[\widehat{y}^{\,(P)}_t]_{\text{lower}},
+ [\widehat{y}^{(H)}_t]_{\text{lower}} \approx w_S\,[\widehat{y}^{(S)}_t]_{\text{lower}} + w_P\,[\widehat{y}^{(P)}_t]_{\text{lower}},
  \quad
- [\widehat{y}^{\,(H)}_t]_{\text{upper}} \approx w_S\,[\widehat{y}^{\,(S)}_t]_{\text{upper}} + w_P\,[\widehat{y}^{\,(P)}_t]_{\text{upper}}.
+ [\widehat{y}^{(H)}_t]_{\text{upper}} \approx w_S\,[\widehat{y}^{(S)}_t]_{\text{upper}} + w_P\,[\widehat{y}^{(P)}_t]_{\text{upper}}.
 $$
+
+This assumes weak dependence between model errors; it serves as a pragmatic approximation in practice.
+
+
+## Evaluation and Final Forecast
+- Split: last h weeks serve as the validation horizon; training uses all prior weeks.
+- Metrics: RMSE, MAE are reported for SARIMA, Prophet (if installed), and Hybrid.
+- Final forecast: After validating, you may retrain on the full weekly series and forecast the next h weeks; the GUI’s “Run Forecast” horizon directly shows future-only bars for the next h weeks.
+
+
+## Example Outputs (Graphs)
+
+- GUI “Run Forecast”: Future-only bar chart, side-by-side bars for SARIMA (blue), Prophet (orange), Hybrid (lavender), with error bars. Use a large enough “Forecast weeks” to reach 2026+.
+- CLI monthly plot: Running the CLI saves a PNG inside outputs/, e.g. outputs/all_forecast_plot.png.
 
 
 
