@@ -33,9 +33,9 @@ Notes on Prophet:
 
 4) CLI (optional, monthly)
 - Example overall monthly run (6 months):
-  - python D:\prophet_sarima\forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --periods 6
+  - python forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --periods 6
 - Municipality monthly run (12 months):
-  - python D:\prophet_sarima\forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --level municipality --province RIZAL --municipality TAYTAY --periods 12
+  - python forecast.py --file "D:\prophet_sarima\Animal Bites Cases.csv" --level municipality --province RIZAL --municipality TAYTAY --periods 12
 
 
 ## Pipeline Overview (Graph)
@@ -140,25 +140,6 @@ $$
  [\widehat{y}^{\,(H)}_t]_{\text{upper}} \approx w_S\,[\widehat{y}^{\,(S)}_t]_{\text{upper}} + w_P\,[\widehat{y}^{\,(P)}_t]_{\text{upper}}.
 $$
 
-This assumes weak dependence between model errors; it serves as a pragmatic approximation in practice.
-
-
-## Evaluation and Final Forecast
-- Split: last h weeks serve as the validation horizon; training uses all prior weeks.
-- Metrics: RMSE, MAE are reported for SARIMA, Prophet (if installed), and Hybrid.
-- Final forecast: After validating, you may retrain on the full weekly series and forecast the next h weeks; the GUI’s “Run Forecast” horizon directly shows future-only bars for the next h weeks.
-
-
-## Example Outputs (Graphs)
-
-- GUI “Run Forecast”: Future-only bar chart, side-by-side bars for SARIMA (blue), Prophet (orange), Hybrid (lavender), with error bars. Use a large enough “Forecast weeks” to reach 2026+.
-- CLI monthly plot: Running the CLI saves a PNG inside outputs/, e.g. outputs/all_forecast_plot.png.
-
-You can embed your latest saved figure in downstream docs by referencing it, for example:
-
-```markdown
-![Propsarim Hybrid Forecast](outputs/all_forecast_plot.png)
-```
 
 
 ## Advanced Notes
